@@ -1,6 +1,10 @@
 # esphome-m5stamplc
 ESPHome configuration &amp; components for the M5StamPLC controller.
 
+If you find this useful please consider supporting me by buying me a coffee. Thank you!
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/jvn5gy8fdy)
+
 https://docs.m5stack.com/en/core/StamPLC
 
 ![StamPLC Screen Showing Status](esphome_m5stamplc.jpg)
