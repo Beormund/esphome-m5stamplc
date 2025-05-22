@@ -1,15 +1,21 @@
 # esphome-m5stamplc
-ESPHome configuration &amp; components for the M5StamPLC controller
+ESPHome configuration &amp; components for the M5StamPLC controller.
 
 https://docs.m5stack.com/en/core/StamPLC
 
-NB: The controller uses GPIO03 drain pin as RESET. It needs to be pulled HIGH during boot for the GPIO Expander to initialise correctly:
+The example config requires wifi to be configured. The LED screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and LED indicator controls show up in the Home Assistant UI.
+
+The LED indicator light can show a maximum of 8 colours using a combination of 3 RGB switches.
+
+The configuration also reports controller temperature, voltage, current, and power. Since the configuration is using Wifi and SNTP, the internal RTC is not currently used. Submit an issue if you would like support for the RTC chip.
 
 In time, these components will be submitted to ESPHome to be included as standard components.
 
 Please post your example configs in the discussion area - especially any LVGL/Display configurations.
 
 TODO: One single M5StamPLC component to abstract away some of the configuration complexities and to bring all the dependencies together.
+
+NB: The controller uses GPIO03 drain pin as RESET. It needs to be pulled HIGH during boot for the GPIO Expander to initialise correctly:
 
 ```yaml
   on_boot:
