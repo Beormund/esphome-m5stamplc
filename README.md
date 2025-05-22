@@ -24,7 +24,7 @@ TODO: One single M5StamPLC component to abstract away some of the configuration 
 Example Configuration YAML:
 ```yaml
 substitutions:
-  name: M5StamPLC
+  name: m5stamplc
   friendly_name: 'M5Stack STAMPLC'
 
 esphome:
