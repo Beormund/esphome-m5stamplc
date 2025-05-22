@@ -3,6 +3,8 @@ ESPHome configuration &amp; components for the M5StamPLC controller.
 
 https://docs.m5stack.com/en/core/StamPLC
 
+![StamPLC Screen Showing Status](esphome_m5stamplc.jpg)
+
 The example config requires wifi to be configured. The LED screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and LED indicator controls show up in the Home Assistant UI.
 
 The LED indicator light can show a maximum of 8 colours using a combination of 3 RGB switches.
