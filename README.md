@@ -20,11 +20,11 @@ LED Backlight
 Relays 1-4
 
 **Sensors**:  
-Buttons A,B,C
+Buttons A,B,C  
 Inputs 1-8
 
 **Configuration**:  
-LED Indicator*
+LCD Indicator*
 
 **Diagnostics**:  
 Bus Voltage  
