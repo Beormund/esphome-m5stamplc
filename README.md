@@ -1,5 +1,5 @@
 # esphome-m5stamplc
-ESPHome configuration &amp; components for the M5StamPLC controller.
+# ESPHome configuration &amp; components for the M5StamPLC controller.
 
 If you find this useful please consider supporting me by buying me a coffee. Thank you!
 
@@ -9,17 +9,38 @@ https://docs.m5stack.com/en/core/StamPLC
 
 ![StamPLC Screen Showing Status](esphome_m5stamplc.jpg)
 
-The example config requires wifi to be configured. The LED screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and LED indicator controls show up in the Home Assistant UI.
+The example config requires wifi to be configured. The LED screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and diagnostic controls show up in the Home Assistant UI.
 
-The LED indicator light can show a maximum of 8 colours using a combination of 3 RGB switches.
+## Home Assistant UI / Local Web Inteface (http://m5stamplc.local)
 
-The configuration also reports controller temperature, voltage, current, and power. Since the configuration is using Wifi and SNTP, the internal RTC is not currently used. Submit an issue if you would like support for the RTC chip.
+**Controls**:  
+LED Backlight    
+Relays 1-4
+
+**Sensors**:  
+Buttons A,B,C
+Inputs 1-8
+
+**Configuration**:  
+LED Indicator (color selection)*
+
+**Diagnostics**:  
+Bus Voltage
+Shunt Voltage
+Current
+Power
+Temperature
+
+
+*The LED indicator light is 3-bit only and can show a maximum of 8 colours using the selection control. On startup the LED indicator is red (wifi not connected). Once connected to wifi the LED indicator turns blue.
+
+Since the configuration is using Wifi and SNTP, the internal RTC is not currently used. Submit an issue if you would like support for the RTC chip.
 
 In time, these components will be submitted to ESPHome to be included as standard components.
 
 Please post your example configs in the discussion area - especially any LVGL/Display configurations.
 
-TODO: One single M5StamPLC component to abstract away some of the configuration complexities and to bring all the dependencies together.
+TODO: One single M5StamPLC component to abstract away some of the configuration complexities and to bring all the dependencies together. Modbus RS485 support is also planned.
 
 NB: The controller uses GPIO03 drain pin as RESET. It needs to be pulled HIGH during boot for the GPIO Expander to initialise correctly:
 
@@ -33,7 +54,8 @@ NB: The controller uses GPIO03 drain pin as RESET. It needs to be pulled HIGH du
 ```
 
 
-Example Configuration YAML:
+## Example Configuration YAML:
+
 ```yaml
 substitutions:
   name: m5stamplc
@@ -89,16 +111,22 @@ improv_serial:
 
 wifi:
   id: wifi_1
-  ssid: <your wifi ssid>
-  password: <your wifi password>
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
   # Set up a wifi access point
   ap: {}
   on_connect:
     then:
-      component.update: vdu
+      - component.update: vdu
+      - select.set:
+          id: select_led_color
+          option: "Blue"
   on_disconnect:
     then:
-      component.update: vdu
+      - component.update: vdu
+      - select.set:
+          id: select_led_color
+          option: "Red"      
 
 # In combination with the `ap` this allows the user
 # to provision wifi credentials to the device via WiFi AP.
@@ -107,12 +135,19 @@ captive_portal:
 # To have a "next url" for improv serial
 web_server:
   port: 80
+  version: 3
+  ota: true
+  log: true
+  local: true
 
 # Time
 time:
   - platform: sntp
     id: sntp_time
     timezone: Europe/London
+    on_time_sync:
+      then:
+        - component.update: vdu
     on_time:
       - cron: '0 * * * * *'
         then:
@@ -212,10 +247,10 @@ switch:
       mode:
         output: true
         pulldown: true
-  # LED (8 colors using RGB on/off)        
+  # led indicator 3-bit (8 colors only)
   - platform: gpio
-    restore_mode: RESTORE_DEFAULT_ON
-    name: "LED Red"
+    restore_mode: ALWAYS_ON
+    id: "led_red"
     pin:
       pi4ioe5v6408: pi4ioe5v6408_1
       number: 6
@@ -224,8 +259,8 @@ switch:
         output: true
         pulldown: true
   - platform: gpio
-    restore_mode: RESTORE_DEFAULT_ON
-    name: "LED Green"
+    restore_mode: ALWAYS_OFF
+    id: "led_green"
     pin:
       pi4ioe5v6408: pi4ioe5v6408_1
       number: 5
@@ -234,19 +269,63 @@ switch:
         output: true
         pulldown: true
   - platform: gpio
-    restore_mode: RESTORE_DEFAULT_ON
-    name: "LED Blue"
+    restore_mode: ALWAYS_OFF  
+    id: "led_blue"
     pin:
       pi4ioe5v6408: pi4ioe5v6408_1
       number: 4
       inverted: true
       mode:
         output: true
-        pulldown: true
+        pulldown: true        
 
-# Set up the pwm buzzer on pin 44
-# See https://esphome.io/components/rtttl.html
+# Enable Web/HA UI to set 3-bit colors for LED Status
+select:
+  - platform: template
+    id: select_led_color
+    name: "Select LED Color"
+    entity_category: config
+    initial_option: Red
+    optimistic: true
+    options:
+      - Black
+      - Red
+      - Green
+      - Yellow
+      - Blue
+      - Magenta
+      - Cyan
+      - White
+    on_value: 
+      then:
+        - lambda: "id(set_led)->execute(i);"
+          
+
+script:
+  - id: set_led
+    parameters:
+      color_id: int
+    then:
+      lambda: |-
+        if ((color_id & 1) == 1) {
+          id(led_red).turn_on();
+        } else {
+          id(led_red).turn_off();
+        }
+        if ((color_id & 2) == 2) {
+          id(led_green).turn_on();
+        } else {
+          id(led_green).turn_off();
+        }
+        if ((color_id & 4) == 4) {
+          id(led_blue).turn_on();
+        } else {
+          id(led_blue).turn_off();
+        }
+
 output:
+  # Set up the pwm buzzer on pin 44
+  # See https://esphome.io/components/rtttl.html
   - platform: ledc
     pin: GPIO44
     id: buzzer
@@ -387,29 +466,37 @@ sensor:
     max_current: 8.192
     current:
       name: "Current"
+      entity_category: "diagnostic"
     power:
       name: "Power"
+      entity_category: "diagnostic"
     bus_voltage:
       name: "Bus Voltage"
+      entity_category: "diagnostic"
     shunt_voltage:
       name: "Shunt Voltage"
+      entity_category: "diagnostic"
+
   # LM75B Temp Sensor on i2c default address 0x48 
   - platform: lm75b
     name: "Temperature"
     update_interval: 60s
+    entity_category: "diagnostic"
 
 # Some colors for the LED display
 color:
   - id: orange
-    hex: FFA500
+    hex: fff099
   - id: grey
     hex: 3A3B3C
   - id: blue
-    hex: 6AC9FF
+    hex: 9fcff9
   - id: green
-    hex: 2DDE68
+    hex: 51af73
   - id: red
-    hex: F7444E
+    hex: db6676
+  - id: purple
+    hex: af69e3
 
 display:
   platform: ili9xxx
@@ -428,27 +515,28 @@ display:
   #show_test_card: true
   lambda: |-
     if (id(sntp_time).now().is_valid()) {
-      it.strftime(5, 0, id(font1), Color(orange), "%a %d %b %Y  %H:%M", id(sntp_time).now()); 
+      it.strftime(5, 0, id(font1), Color(orange), "%a %d %b %Y  %H:%M  %Z", id(sntp_time).now()); 
     }
     it.line(5, 19, 230, 19, id(grey));
-    it.print(5, 28, id(font1), id(orange), "Inputs");
-    it.filled_rectangle(5, 47, 25, 25, id(i1).state ? id(green) : id(grey));
-    it.filled_rectangle(34, 47, 25, 25, id(i2).state ? id(green) : id(grey));
-    it.filled_rectangle(63, 47, 25, 25, id(i3).state ? id(green) : id(grey));
-    it.filled_rectangle(92, 47, 25, 25, id(i4).state ? id(green) : id(grey));
-    it.filled_rectangle(121, 47, 25, 25, id(i5).state ? id(green) : id(grey));
-    it.filled_rectangle(150, 47, 25, 25, id(i6).state ? id(green) : id(grey));
-    it.filled_rectangle(179, 47, 25, 25, id(i7).state ? id(green) : id(grey));
-    it.filled_rectangle(208, 47, 25, 25, id(i8).state ? id(green) : id(grey));
-    it.print(5, 76, id(font1), Color(orange), "Relays");
-    it.filled_rectangle(5, 95, 25, 25, id(r1).state ? id(green) : id(grey));
-    it.filled_rectangle(34, 95, 25, 25, id(r2).state ? id(green) : id(grey));
-    it.filled_rectangle(63, 95, 25, 25, id(r3).state ? id(green) : id(grey));
-    it.filled_rectangle(92, 95, 25, 25, id(r4).state ? id(green) : id(grey));
+    it.print(5, 28, id(font1), id(orange), "Inputs 1-8");
+    it.filled_rectangle(5, 47, 25, 25, id(i1).state ? id(purple) : id(grey));
+    it.filled_rectangle(34, 47, 25, 25, id(i2).state ? id(purple) : id(grey));
+    it.filled_rectangle(63, 47, 25, 25, id(i3).state ? id(purple) : id(grey));
+    it.filled_rectangle(92, 47, 25, 25, id(i4).state ? id(purple) : id(grey));
+    it.filled_rectangle(121, 47, 25, 25, id(i5).state ? id(purple) : id(grey));
+    it.filled_rectangle(150, 47, 25, 25, id(i6).state ? id(purple) : id(grey));
+    it.filled_rectangle(179, 47, 25, 25, id(i7).state ? id(purple) : id(grey));
+    it.filled_rectangle(208, 47, 25, 25, id(i8).state ? id(purple) : id(grey));
+    it.print(5, 76, id(font1), Color(orange), "Relays 1-4");
+    it.filled_rectangle(5, 95, 25, 25, id(r1).state ? id(red) : id(grey));
+    it.filled_rectangle(34, 95, 25, 25, id(r2).state ? id(red) : id(grey));
+    it.filled_rectangle(63, 95, 25, 25, id(r3).state ? id(red) : id(grey));
+    it.filled_rectangle(92, 95, 25, 25, id(r4).state ? id(red) : id(grey));
     it.rectangle(150, 95, 81, 25, id(blue));
     it.print(175, 100, id(font1), id(wifi_1).is_connected() ? id(green) : id(grey), "WiFi");
 font:
   file: "gfonts://Roboto"
   id: font1
   size: 15
+  
 ```
