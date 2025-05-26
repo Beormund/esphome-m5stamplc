@@ -123,8 +123,8 @@ aw9523:
     divider: 3
     latch_inputs: true
 
-# Relays 1-4
 switch:
+  # Relays 1-4
   - platform: gpio
     restore_mode: RESTORE_DEFAULT_OFF
     name: "Relay 1"
@@ -177,10 +177,10 @@ switch:
       - component.update: vdu
     on_turn_off:
       - component.update: vdu
-  # LED backlight (on/off only)
+  # LCD backlight (on/off only)
   - platform: gpio
     restore_mode: ALWAYS_ON
-    name: "LED Backlight"
+    name: "LCD Backlight"
     pin:
       pi4ioe5v6408: pi4ioe5v6408_1
       number: 7
@@ -240,7 +240,6 @@ select:
     on_value: 
       then:
         - lambda: "id(set_led)->execute(i);"
-          
 
 script:
   - id: set_led
@@ -417,7 +416,6 @@ sensor:
     shunt_voltage:
       name: "Shunt Voltage"
       entity_category: "diagnostic"
-
   # LM75B Temp Sensor on i2c default address 0x48 
   - platform: lm75b
     name: "Temperature"

@@ -7,7 +7,9 @@ If you find this useful please consider supporting me by buying me a coffee. Tha
 
 https://docs.m5stack.com/en/core/StamPLC
 
-![StamPLC Screen Showing Status](esphome_m5stamplc.jpg)
+![StamPLC Screen Showing Status](images/m5stamplc_screen.png)  
+
+![StamPLC Local Web](images/m5stamplc_web.png)  
 
 The example config requires wifi to be configured. The LED screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and diagnostic controls show up in the Home Assistant UI.
 
@@ -22,13 +24,13 @@ Buttons A,B,C
 Inputs 1-8
 
 **Configuration**:  
-LED Indicator (color selection)*
+LED Indicator*
 
 **Diagnostics**:  
-Bus Voltage
-Shunt Voltage
-Current
-Power
+Bus Voltage  
+Shunt Voltage  
+Current  
+Power  
 Temperature
 
 
@@ -182,8 +184,8 @@ aw9523:
     divider: 3
     latch_inputs: true
 
-# Relays 1-4
 switch:
+  # Relays 1-4
   - platform: gpio
     restore_mode: RESTORE_DEFAULT_OFF
     name: "Relay 1"
@@ -236,10 +238,10 @@ switch:
       - component.update: vdu
     on_turn_off:
       - component.update: vdu
-  # LED backlight (on/off only)
+  # LCD backlight (on/off only)
   - platform: gpio
     restore_mode: ALWAYS_ON
-    name: "LED Backlight"
+    name: "LCD Backlight"
     pin:
       pi4ioe5v6408: pi4ioe5v6408_1
       number: 7
