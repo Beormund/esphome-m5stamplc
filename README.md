@@ -16,7 +16,7 @@ The example config requires wifi to be configured. The LED screen displays relay
 ## Home Assistant UI / Local Web Inteface (http://m5stamplc.local)
 
 **Controls**:  
-LED Backlight    
+LCD Backlight    
 Relays 1-4
 
 **Sensors**:  
@@ -24,7 +24,7 @@ Buttons A,B,C
 Inputs 1-8
 
 **Configuration**:  
-LCD Indicator*
+LED Indicator*
 
 **Diagnostics**:  
 Bus Voltage  
