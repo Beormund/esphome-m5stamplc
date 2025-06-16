@@ -11,9 +11,15 @@ https://docs.m5stack.com/en/core/StamPLC
 
 ![StamPLC Local Web](images/m5stamplc_web.png)  
 
-The example config requires wifi to be configured. The LED screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and diagnostic controls show up in the Home Assistant UI.
+The example config requires wifi to be configured. The LCD screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and diagnostic controls show up in the Home Assistant UI.
 
 ## Home Assistant UI / Local Web Inteface (http://m5stamplc.local)
+
+**Components**  
+PI4IOE5V6408 (GPIO Expander 1)  
+AW9523 (GPIO Expander 2)  
+LM75B (Temperature Sensor)  
+RX8130 (RTC)
 
 **Controls**:  
 LCD Backlight    
@@ -28,15 +34,21 @@ LED Indicator*
 
 **Diagnostics**:  
 Bus Voltage  
-Shunt Voltage  
-Current  
+Shunt Voltage**  
+Current**  
 Power  
 Temperature
 
 
 *The LED indicator light is 3-bit only and can show a maximum of 8 colours using the selection control. On startup the LED indicator is red (wifi not connected). Once connected to wifi the LED indicator turns blue.
 
-Since the configuration is using Wifi and SNTP, the internal RTC is not currently used. Submit an issue if you would like support for the RTC chip.
+**Note that the INA226 voltage/current/power sensor on the StamPLC is only connected to the SYS_VIN bus. Therefore it only measures the current and voltage of the GPIO.EXT expansion inteface (to the side of the unit) and not the relays or grove intefaces.
+
+![StamPLC INA226 Schematic](images/ina226.png)  
+
+The M5StamPLC has an internal RTC chip (RX8130) which is connected to a rechargeable battery. The RX8130 component included in this project enables battery charging and automatic battery power switching should the M5StamPLC lose power. Since the configuration is using Wifi and SNTP, the internal RTC chip is initially set from SNTP. On subsequent restarts, the RTC chip's time is used to set the system clock until/unless SNTP becomes available.
+
+![StamPLC RX8130 Schematic](images/rx8130.png) 
 
 In time, these components will be submitted to ESPHome to be included as standard components.
 
@@ -73,6 +85,8 @@ esphome:
       - -DARDUINO_USB_CDC_ON_BOOT=1
       - -DARDUINO_USB_MODE=1
   on_boot:
+    - then:
+        rx8130.read_time:
     - priority: 1000
       then:
         - lambda: |-
@@ -84,8 +98,8 @@ esphome:
 
 # Import custom components...
 external_components:
-    - source: github://beormund/esphome-m5stamplc@main
-      components: [aw9523, pi4ioe5v6408, lm75b]
+  - source: github://beormund/esphome-m5stamplc@main
+    components: [aw9523, pi4ioe5v6408, lm75b, rx8130]
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -144,11 +158,19 @@ web_server:
 
 # Time
 time:
+  - platform: rx8130
+    id: rx8130_time
+    update_interval: 30 min
+    on_time_sync:
+      then:
+        - component.update: vdu
   - platform: sntp
     id: sntp_time
     timezone: Europe/London
     on_time_sync:
       then:
+        - rx8130.write_time:
+            id: rx8130_time
         - component.update: vdu
     on_time:
       - cron: '0 * * * * *'
@@ -301,7 +323,6 @@ select:
     on_value: 
       then:
         - lambda: "id(set_led)->execute(i);"
-          
 
 script:
   - id: set_led
@@ -478,7 +499,6 @@ sensor:
     shunt_voltage:
       name: "Shunt Voltage"
       entity_category: "diagnostic"
-
   # LM75B Temp Sensor on i2c default address 0x48 
   - platform: lm75b
     name: "Temperature"
@@ -516,8 +536,8 @@ display:
   update_interval: never
   #show_test_card: true
   lambda: |-
-    if (id(sntp_time).now().is_valid()) {
-      it.strftime(5, 0, id(font1), Color(orange), "%a %d %b %Y  %H:%M  %Z", id(sntp_time).now()); 
+    if (id(rx8130_time).now().is_valid()) {
+      it.strftime(5, 0, id(font1), Color(orange), "%a %d %b %Y  %H:%M  %Z", id(rx8130_time).now()); 
     }
     it.line(5, 19, 230, 19, id(grey));
     it.print(5, 28, id(font1), id(orange), "Inputs 1-8");

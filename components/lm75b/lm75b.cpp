@@ -29,7 +29,7 @@ void LM75BComponent::update() {
       this->status_set_warning();
       return;  
     }
-    // Swap byates
+    // Swap bytes
     int16_t raw_temperature = (buff[0] << 8) | buff[1];
     // Remove 5 unused least significant bits
     raw_temperature >>= 5;

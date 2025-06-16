@@ -12,6 +12,8 @@ esphome:
       - -DARDUINO_USB_CDC_ON_BOOT=1
       - -DARDUINO_USB_MODE=1
   on_boot:
+    - then:
+        rx8130.read_time:
     - priority: 1000
       then:
         - lambda: |-
@@ -23,8 +25,8 @@ esphome:
 
 # Import custom components...
 external_components:
-    - source: github://beormund/esphome-m5stamplc@main
-      components: [aw9523, pi4ioe5v6408, lm75b]
+  - source: github://beormund/esphome-m5stamplc@main
+    components: [aw9523, pi4ioe5v6408, lm75b, rx8130]
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -83,11 +85,19 @@ web_server:
 
 # Time
 time:
+  - platform: rx8130
+    id: rx8130_time
+    update_interval: 30 min
+    on_time_sync:
+      then:
+        - component.update: vdu
   - platform: sntp
     id: sntp_time
     timezone: Europe/London
     on_time_sync:
       then:
+        - rx8130.write_time:
+            id: rx8130_time
         - component.update: vdu
     on_time:
       - cron: '0 * * * * *'
@@ -453,8 +463,8 @@ display:
   update_interval: never
   #show_test_card: true
   lambda: |-
-    if (id(sntp_time).now().is_valid()) {
-      it.strftime(5, 0, id(font1), Color(orange), "%a %d %b %Y  %H:%M  %Z", id(sntp_time).now()); 
+    if (id(rx8130_time).now().is_valid()) {
+      it.strftime(5, 0, id(font1), Color(orange), "%a %d %b %Y  %H:%M  %Z", id(rx8130_time).now()); 
     }
     it.line(5, 19, 230, 19, id(grey));
     it.print(5, 28, id(font1), id(orange), "Inputs 1-8");
