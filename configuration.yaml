@@ -451,12 +451,15 @@ display:
   platform: ili9xxx
   id: vdu
   model: ST7789V
-  rotation: 90
+  transform: 
+    swap_xy: True
+    mirror_x: True
+    mirror_y: False
   dimensions:
-    height: 240
-    width: 135
-    offset_height: 40
-    offset_width: 52
+    width: 240
+    height: 135
+    offset_width: 40
+    offset_height: 52
   dc_pin: GPIO06
   cs_pin: GPIO12
   invert_colors: true
