@@ -11,7 +11,7 @@ https://docs.m5stack.com/en/core/StamPLC
 
 ![StamPLC Local Web](images/m5stamplc_web.png)  
 
-The example config requires wifi to be configured. The LCD screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and diagnostic controls show up in the Home Assistant UI.
+The example config requires wifi to be configured. Don't forget to set the timezone for your location under the time section of the config. The LCD screen displays relay and input status along with date/time and wifi connection status. If the Home Assistant API is enabled then all the relays, inputs, buttons and diagnostic controls show up in the Home Assistant UI.
 
 ## Home Assistant UI / Local Web Inteface (http://m5stamplc.local)
 
@@ -505,7 +505,7 @@ sensor:
     update_interval: 60s
     entity_category: "diagnostic"
 
-# Some colors for the LED display
+# Some colors for the LCD display
 color:
   - id: orange
     hex: fff099
@@ -524,12 +524,15 @@ display:
   platform: ili9xxx
   id: vdu
   model: ST7789V
-  rotation: 90
+  transform: 
+    swap_xy: True
+    mirror_x: True
+    mirror_y: False
   dimensions:
-    height: 240
-    width: 135
-    offset_height: 40
-    offset_width: 52
+    width: 240
+    height: 135
+    offset_width: 40
+    offset_height: 52
   dc_pin: GPIO06
   cs_pin: GPIO12
   invert_colors: true
@@ -549,16 +552,15 @@ display:
     it.filled_rectangle(150, 47, 25, 25, id(i6).state ? id(purple) : id(grey));
     it.filled_rectangle(179, 47, 25, 25, id(i7).state ? id(purple) : id(grey));
     it.filled_rectangle(208, 47, 25, 25, id(i8).state ? id(purple) : id(grey));
-    it.print(5, 76, id(font1), Color(orange), "Relays 1-4");
-    it.filled_rectangle(5, 95, 25, 25, id(r1).state ? id(red) : id(grey));
-    it.filled_rectangle(34, 95, 25, 25, id(r2).state ? id(red) : id(grey));
-    it.filled_rectangle(63, 95, 25, 25, id(r3).state ? id(red) : id(grey));
-    it.filled_rectangle(92, 95, 25, 25, id(r4).state ? id(red) : id(grey));
-    it.rectangle(150, 95, 81, 25, id(blue));
-    it.print(175, 100, id(font1), id(wifi_1).is_connected() ? id(green) : id(grey), "WiFi");
+    it.print(5, 80, id(font1), Color(orange), "Relays 1-4");
+    it.filled_rectangle(5, 99, 25, 25, id(r1).state ? id(red) : id(grey));
+    it.filled_rectangle(34, 99, 25, 25, id(r2).state ? id(red) : id(grey));
+    it.filled_rectangle(63, 99, 25, 25, id(r3).state ? id(red) : id(grey));
+    it.filled_rectangle(92, 99, 25, 25, id(r4).state ? id(red) : id(grey));
+    it.rectangle(150, 99, 81, 25, id(blue));
+    it.print(175, 104, id(font1), id(wifi_1).is_connected() ? id(green) : id(grey), "WiFi");
 font:
   file: "gfonts://Roboto"
   id: font1
   size: 15
-  
 ```

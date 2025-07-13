@@ -479,13 +479,13 @@ display:
     it.filled_rectangle(150, 47, 25, 25, id(i6).state ? id(purple) : id(grey));
     it.filled_rectangle(179, 47, 25, 25, id(i7).state ? id(purple) : id(grey));
     it.filled_rectangle(208, 47, 25, 25, id(i8).state ? id(purple) : id(grey));
-    it.print(5, 76, id(font1), Color(orange), "Relays 1-4");
-    it.filled_rectangle(5, 95, 25, 25, id(r1).state ? id(red) : id(grey));
-    it.filled_rectangle(34, 95, 25, 25, id(r2).state ? id(red) : id(grey));
-    it.filled_rectangle(63, 95, 25, 25, id(r3).state ? id(red) : id(grey));
-    it.filled_rectangle(92, 95, 25, 25, id(r4).state ? id(red) : id(grey));
-    it.rectangle(150, 95, 81, 25, id(blue));
-    it.print(175, 100, id(font1), id(wifi_1).is_connected() ? id(green) : id(grey), "WiFi");
+    it.print(5, 80, id(font1), Color(orange), "Relays 1-4");
+    it.filled_rectangle(5, 99, 25, 25, id(r1).state ? id(red) : id(grey));
+    it.filled_rectangle(34, 99, 25, 25, id(r2).state ? id(red) : id(grey));
+    it.filled_rectangle(63, 99, 25, 25, id(r3).state ? id(red) : id(grey));
+    it.filled_rectangle(92, 99, 25, 25, id(r4).state ? id(red) : id(grey));
+    it.rectangle(150, 99, 81, 25, id(blue));
+    it.print(175, 104, id(font1), id(wifi_1).is_connected() ? id(green) : id(grey), "WiFi");
 font:
   file: "gfonts://Roboto"
   id: font1
