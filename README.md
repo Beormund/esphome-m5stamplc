@@ -78,6 +78,7 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
+  min_version: 2025.7.0
   platformio_options:
     build_flags:
       - -DESP32S3
@@ -152,7 +153,6 @@ captive_portal:
 web_server:
   port: 80
   version: 3
-  ota: true
   log: true
   local: true
 
