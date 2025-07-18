@@ -55,6 +55,17 @@ Please post your example configs in the discussion area - especially any LVGL/Di
 
 TODO: One single M5StamPLC component to abstract away some of the configuration complexities and to bring all the dependencies together. Modbus RS485 support is also planned.
 
+NB: The controller uses GPIO03 drain pin as RESET. It needs to be pulled HIGH during boot for the GPIO Expander to initialise correctly:
+
+```yaml
+  on_boot:
+    - priority: 1000
+      then:
+        - lambda: |-
+            pinMode(03, OUTPUT);
+            digitalWrite(03, HIGH);
+```
+
 
 ## Example Configuration YAML:
 
@@ -76,6 +87,11 @@ esphome:
   on_boot:
     - then:
         rx8130.read_time:
+    - priority: 1000
+      then:
+        - lambda: |-
+            pinMode(03, OUTPUT);
+            digitalWrite(03, HIGH);
     - priority: -100
       then:
        component.update: vdu
