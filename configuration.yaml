@@ -15,11 +15,6 @@ esphome:
   on_boot:
     - then:
         rx8130.read_time:
-    - priority: 1000
-      then:
-        - lambda: |-
-            pinMode(03, OUTPUT);
-            digitalWrite(03, HIGH);
     - priority: -100
       then:
        component.update: vdu
@@ -27,7 +22,7 @@ esphome:
 # Import custom components...
 external_components:
   - source: github://beormund/esphome-m5stamplc@main
-    components: [aw9523, pi4ioe5v6408, lm75b, rx8130]
+    components: [aw9523, lm75b, rx8130]
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -43,6 +38,7 @@ safe_mode:
 # Allow Over-The-Air updates
 ota:
   - platform: esphome
+  - platform: web_server
 
 #Enable logging
 logger:

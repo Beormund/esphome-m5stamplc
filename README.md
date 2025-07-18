@@ -16,7 +16,6 @@ The example config requires wifi to be configured. Don't forget to set the timez
 ## Home Assistant UI / Local Web Inteface (http://m5stamplc.local)
 
 **Components**  
-PI4IOE5V6408 (GPIO Expander 1)  
 AW9523 (GPIO Expander 2)  
 LM75B (Temperature Sensor)  
 RX8130 (RTC)
@@ -56,17 +55,6 @@ Please post your example configs in the discussion area - especially any LVGL/Di
 
 TODO: One single M5StamPLC component to abstract away some of the configuration complexities and to bring all the dependencies together. Modbus RS485 support is also planned.
 
-NB: The controller uses GPIO03 drain pin as RESET. It needs to be pulled HIGH during boot for the GPIO Expander to initialise correctly:
-
-```yaml
-  on_boot:
-    - priority: 1000
-      then:
-        - lambda: |-
-            pinMode(03, OUTPUT);
-            digitalWrite(03, HIGH);
-```
-
 
 ## Example Configuration YAML:
 
@@ -88,11 +76,6 @@ esphome:
   on_boot:
     - then:
         rx8130.read_time:
-    - priority: 1000
-      then:
-        - lambda: |-
-            pinMode(03, OUTPUT);
-            digitalWrite(03, HIGH);
     - priority: -100
       then:
        component.update: vdu
@@ -116,6 +99,7 @@ safe_mode:
 # Allow Over-The-Air updates
 ota:
   - platform: esphome
+  - platform: web_server
 
 #Enable logging
 logger:
