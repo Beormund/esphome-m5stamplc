@@ -83,7 +83,7 @@ esphome:
 # Import custom components...
 external_components:
   - source: github://beormund/esphome-m5stamplc@main
-    components: [aw9523, pi4ioe5v6408, lm75b, rx8130]
+    components: [aw9523, lm75b, rx8130]
 
 esp32:
   board: esp32-s3-devkitc-1
