@@ -1,5 +1,6 @@
 #pragma once
 
+#include "esphome/core/version.h"
 #include "esphome/components/aw9523/aw9523.h"
 
 namespace esphome {
@@ -12,7 +13,12 @@ class AW9523GPIOPin : public GPIOPin {
   void setup() override;
   void pin_mode(gpio::Flags flags) override;
   gpio::Flags get_flags() const override;
+#if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 1, 0)
+  size_t dump_summary(char *buffer, size_t len) const override;
+#else
+  // https://developers.esphome.io/blog/2026/01/12/gpiopindump_summary-now-uses-buffer-based-api/
   std::string dump_summary() const override;
+#endif
   bool digital_read() override;
   void digital_write(bool value) override;
   void set_parent(AW9523Component *parent) { parent_ = parent; }

@@ -15,10 +15,17 @@ void AW9523GPIOPin::pin_mode(gpio::Flags flags) {
 gpio::Flags AW9523GPIOPin::get_flags() const { return this->flags_; }
 bool AW9523GPIOPin::digital_read() { return this->parent_->digital_read(this->pin_) != this->inverted_; }
 void AW9523GPIOPin::digital_write(bool value) { this->parent_->digital_write(this->pin_, value != this->inverted_); }
+#if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 1, 0)
+size_t AW9523GPIOPin::dump_summary(char *buffer, size_t len) const {
+  return snprintf(buffer, len, "%u via AW9523", this->pin_);
+}
+#else
+// https://developers.esphome.io/blog/2026/01/12/gpiopindump_summary-now-uses-buffer-based-api/
 std::string AW9523GPIOPin::dump_summary() const {
   char buffer[32];
-  snprintf(buffer, sizeof(buffer), "%u via AW9523", pin_);
+  snprintf(buffer, sizeof(buffer), "%u via AW9523", this->pin_);
   return buffer;
 }
+#endif
 }  // namespace aw9523
 }  // namespace esphome
