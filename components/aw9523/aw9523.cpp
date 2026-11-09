@@ -49,17 +49,14 @@ void AW9523Component::set_divider(uint8_t divider) { this->divider_ = divider; }
 uint8_t AW9523Component::get_divider() { return this->divider_; }
 
 void AW9523Component::set_pin_value(uint8_t pin, uint8_t val) {
-  if (this->is_failed())
-    return;
+  if (this->is_failed()) return;
   uint8_t reg{};
   // See Table 13. 256 step dimming control register
-  if ((pin >= 0) && (pin <= 7)) {
+  if (pin <= 7) {
     reg = 0x24 + pin;
-  }
-  if ((pin >= 8) && (pin <= 11)) {
+  } else if (pin >= 8 && pin <= 11) {
     reg = 0x20 + pin - 8;
-  }
-  if ((pin >= 12) && (pin <= 15)) {
+  } else if (pin >= 12 && pin <= 15) {
     reg = 0x2C + pin - 12;
   }
   this->reg(reg) = val;
